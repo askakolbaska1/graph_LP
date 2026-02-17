@@ -2,17 +2,7 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="23094e01-5cc0-45ea-bf42-21d6cf0c9829" name="server_laba_mnt">
-        <fileTransfer rootFolder="/mnt/tank/scratch/icheremisin" accessType="SFTP" host="server_laba" port="22" sshConfigId="f17b5518-42b2-4a9b-912c-10022da55bfe" sshConfig="icheremisin@server_laba:22 agent" authAgent="true">
           <advancedOptions>
-            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
-          </advancedOptions>
-        </fileTransfer>
-      </webServer>
-      <webServer id="39dead3e-2afa-4af5-87d4-12437ff55d05" name="sever_laba_nfs">
-        <fileTransfer rootFolder="/nfs/home/icheremisin" accessType="SFTP" host="server_laba" port="22" sshConfigId="f17b5518-42b2-4a9b-912c-10022da55bfe" sshConfig="icheremisin@server_laba:22 agent" authAgent="true">
-          <advancedOptions>
-            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
         </fileTransfer>
       </webServer>
