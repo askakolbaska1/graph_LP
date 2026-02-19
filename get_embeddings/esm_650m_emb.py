@@ -10,13 +10,13 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 login(token="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")
 
 
-model_name = "facebook/esm2_t33_650M_UR50D"
+model_name = "facebook/esm2_t30_150M_UR50D"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModel.from_pretrained(model_name).to(device)
 model.eval()
 
-df = pd.read_csv(f"../data/content_id/AA.csv")
+df = pd.read_csv(f"../data/nodes/AA.csv")
 
 emb_dict = {}
 for i in tqdm(range(len(df["content"])), leave=True):
