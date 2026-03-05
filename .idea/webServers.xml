@@ -3,7 +3,7 @@
   <component name="WebServers">
     <option name="servers">
       <webServer id="571e90a5-30f1-423a-9c20-52c1c3cc7c5d" name="server_laba">
-        <fileTransfer rootFolder="/mnt/tank/scratch/icheremisin" accessType="SFTP" host="server_laba" port="22" sshConfigId="90bc018a-afd1-41f3-a113-fb405a22c7fa" sshConfig="icheremisin@server_laba:22 agent" authAgent="true">
+        <fileTransfer rootFolder="/mnt/tank/scratch/icheremisin" accessType="SFTP" sshConfigId="90bc018a-afd1-41f3-a113-fb405a22c7fa" sshConfig="icheremisin@server_laba:22 agent">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
