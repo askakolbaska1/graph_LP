@@ -1,0 +1,4 @@
+get_embeddings/esm_650m_emb.py - пример получения эмбеддингов esm
+KGE/MLP_different_emb.ipynb - pykeen pipeline для разных типов эмбеддингов
+PyG/Lineral+SAGE.ipynb - GraphSAGE для разных типов эмбеддингов
+utils - функции для работы
