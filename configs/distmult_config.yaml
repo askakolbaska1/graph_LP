@@ -1,0 +1,30 @@
+random_seed: 42
+
+model_type: "distmult"
+
+data_params:
+  input_path: 'data/edges/clean_triples.csv'
+  heads_col: 'id_entity_1'
+  predicates_col: 'predicate'
+  tails_col: 'id_entity_2'
+  train_size: 0.8
+  test_and_val_size: 0.1
+  device: 'cuda'
+
+model_params:
+  hidden_channels: 128
+  margin: 1.0
+
+train_params:
+  batch_size: 8192
+  epochs: 5
+  lr: 0.001
+  sampler: 'random'
+
+
+test_params:
+  batch_size: 8192
+  k_list: [1, 5, 10, 50]
+  N: 3000
+  sampling: False
+  log: True
