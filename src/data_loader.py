@@ -18,10 +18,10 @@ def df_to_triplets_geometric(
 ):
 
     node_keys, node_values = pd.factorize(pd.concat([df[heads], df[tails]]))
-    rawid2id = {k: v.item() for v, k in zip(node_keys, node_values)}
+    rawid2id = {name: i for i, name in enumerate(node_values)}
 
     pred_keys, pred_values = pd.factorize(df[predicates])
-    pred2id = {k: v.item() for v, k in zip(pred_keys, pred_values)}
+    pred2id = {name: i for i, name in enumerate(pred_values)}
 
     df[heads] = df[heads].apply(lambda x: rawid2id[x])
     df[tails] = df[tails].apply(lambda x: rawid2id[x])

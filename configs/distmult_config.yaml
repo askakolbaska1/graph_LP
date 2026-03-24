@@ -19,12 +19,12 @@ train_params:
   batch_size: 8192
   epochs: 5
   lr: 0.001
-  sampler: 'random'
+  sampler: 'sns'
 
 
 test_params:
   batch_size: 8192
   k_list: [1, 5, 10, 50]
-  N: 3000
+  N: 5000
   sampling: False
   log: True
