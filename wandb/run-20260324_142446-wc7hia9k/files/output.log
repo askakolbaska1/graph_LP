@@ -1,0 +1,11 @@
+[*] Starting training
+Epoch 1 finished. Avg Loss: 0.7299
+Epoch 2 finished. Avg Loss: 0.3187
+Epoch 3 finished. Avg Loss: 0.1386
+Epoch 4 finished. Avg Loss: 0.0664
+Epoch 5 finished. Avg Loss: 0.0353
+Epoch 6 finished. Avg Loss: 0.0220
+Epoch 7 finished. Avg Loss: 0.0176
+[*] Running evaluation...
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 5000/5000 [01:36<00:00, 51.68it/s]
+Final Metrics: {'MRR': 0.03590673953294754, 'Hits@': {1: '0.0134', 5: '0.0444', 10: '0.0784', 50: '0.2158'}}

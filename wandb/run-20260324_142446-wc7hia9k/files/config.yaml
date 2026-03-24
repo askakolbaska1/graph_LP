@@ -1,0 +1,84 @@
+_wandb:
+    value:
+        cli_version: 0.25.1
+        e:
+            u4pzlhydqfz8q9ssw76806r9bhedtw40:
+                cpu_count: 14
+                cpu_count_logical: 20
+                cudaVersion: "13.0"
+                disk:
+                    /:
+                        total: "1006450962432"
+                        used: "157008347136"
+                email: ivancheremisin356@gmail.com
+                executable: /home/ivanc/projects/gnn/.venv/bin/python3
+                git:
+                    commit: 2cc5b4fd5de522a808f6b2a86dae900dd28ce6f7
+                    remote: git@github.com:askakolbaska1/graph_LP.git
+                gpu: NVIDIA GeForce RTX 4060
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Ada
+                      cudaCores: 3072
+                      memoryTotal: "8585740288"
+                      name: NVIDIA GeForce RTX 4060
+                      uuid: GPU-12ac245e-38b2-e6ea-2e4b-749c93d4898b
+                host: ivanc-MS-7E07
+                memory:
+                    total: "16590823424"
+                os: Linux-6.14.0-29-generic-x86_64-with-glibc2.39
+                program: -m src.main
+                python: CPython 3.13.9
+                root: /home/ivanc/projects/gnn
+                startedAt: "2026-03-24T11:24:46.373884Z"
+                writerId: u4pzlhydqfz8q9ssw76806r9bhedtw40
+        m: []
+        python_version: 3.13.9
+        t:
+            "1":
+                - 1
+                - 77
+            "2":
+                - 1
+                - 77
+            "3":
+                - 2
+                - 16
+            "4": 3.13.9
+            "5": 0.25.1
+            "12": 0.25.1
+            "13": linux-x86_64
+data_params:
+    value:
+        device: cuda
+        heads_col: id_entity_1
+        input_path: data/edges/clean_triples.csv
+        predicates_col: predicate
+        tails_col: id_entity_2
+        test_and_val_size: 0.1
+        train_size: 0.8
+model_params:
+    value:
+        hidden_channels: 128
+        margin: 1
+model_type:
+    value: distmult
+random_seed:
+    value: 42
+test_params:
+    value:
+        "N": 5000
+        batch_size: 8192
+        k_list:
+            - 1
+            - 5
+            - 10
+            - 50
+        log: true
+        sampling: false
+train_params:
+    value:
+        batch_size: 8192
+        epochs: 7
+        lr: 0.001
+        sampler: sns

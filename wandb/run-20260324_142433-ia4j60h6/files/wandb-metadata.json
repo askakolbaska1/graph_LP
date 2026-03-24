@@ -1,0 +1,15 @@
+{
+  "os": "Linux-6.14.0-29-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.13.9",
+  "startedAt": "2026-03-24T11:24:33.666761Z",
+  "program": "<python with no main file>",
+  "git": {
+    "remote": "git@github.com:askakolbaska1/graph_LP.git",
+    "commit": "2cc5b4fd5de522a808f6b2a86dae900dd28ce6f7"
+  },
+  "email": "ivancheremisin356@gmail.com",
+  "root": "/home/ivanc/projects/gnn",
+  "host": "ivanc-MS-7E07",
+  "executable": "/home/ivanc/projects/gnn/.venv/bin/python",
+  "writerId": "2k9fw8cbgdydpr0992ialq1p33gvjkjv"
+}

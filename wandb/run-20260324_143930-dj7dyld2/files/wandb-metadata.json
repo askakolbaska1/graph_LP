@@ -1,0 +1,38 @@
+{
+  "os": "Linux-6.14.0-29-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.13.9",
+  "startedAt": "2026-03-24T11:39:30.051871Z",
+  "program": "-m src.main",
+  "git": {
+    "remote": "git@github.com:askakolbaska1/graph_LP.git",
+    "commit": "2cc5b4fd5de522a808f6b2a86dae900dd28ce6f7"
+  },
+  "email": "ivancheremisin356@gmail.com",
+  "root": "/home/ivanc/projects/gnn",
+  "host": "ivanc-MS-7E07",
+  "executable": "/home/ivanc/projects/gnn/.venv/bin/python3",
+  "cpu_count": 14,
+  "cpu_count_logical": 20,
+  "gpu": "NVIDIA GeForce RTX 4060",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "1006450962432",
+      "used": "157013581824"
+    }
+  },
+  "memory": {
+    "total": "16590823424"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 4060",
+      "memoryTotal": "8585740288",
+      "cudaCores": 3072,
+      "architecture": "Ada",
+      "uuid": "GPU-12ac245e-38b2-e6ea-2e4b-749c93d4898b"
+    }
+  ],
+  "cudaVersion": "13.0",
+  "writerId": "baj540dnc5i5txqahy9dvjv3s4bz0d7u"
+}
