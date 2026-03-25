@@ -18,7 +18,7 @@ class CustomDistMult(DistMult, BaseModel):
             predicates=kwargs.get('predicates_col'),
             tails=kwargs.get('tails_col'),
             train_size=kwargs.get('train_size', 0.8),
-            test_and_val_size=kwargs.get('test_and_val_size', 0.2),
+            test_and_val_size=kwargs.get('test_and_val_size', 0.1),
             device=kwargs.get('device'),
         )
 
