@@ -1,17 +1,18 @@
 from abc import ABC, abstractmethod
 
 class BaseModel(ABC):
+    @staticmethod
     @abstractmethod
-    def preprocess(self, df, **kwargs):
+    def preprocess(*args, **kwargs):
         """Логика подготовки данных"""
         pass
 
     @abstractmethod
-    def train_model(self, data,  **kwargs):
+    def train_model(self, *args,  **kwargs):
         """Логика обучения"""
         pass
 
     @abstractmethod
-    def test(self, data,  **kwargs):
+    def test(self, *args,  **kwargs):
         """Инференс"""
         pass

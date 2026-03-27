@@ -6,14 +6,15 @@ from torch_geometric.nn import DistMult
 from torch.optim import Adam
 from tqdm import tqdm
 
-from .base import BaseModel
-from .data_loader import df_to_triplets_geometric
+from src.base import BaseModel
+from src.data_loader import df_to_triplets_geometric
 
 
 class CustomDistMult(DistMult, BaseModel):
-    def preprocess(self, df, **kwargs):
+    @staticmethod
+    def preprocess(**kwargs):
         train_triplets, val_triplets, test_triplets, filtered_dict, rawid2id, pred2id = df_to_triplets_geometric(
-            df=df,
+            path=kwargs.get('input_path'),
             heads=kwargs.get('heads_col'),
             predicates=kwargs.get('predicates_col'),
             tails=kwargs.get('tails_col'),
@@ -30,6 +31,8 @@ class CustomDistMult(DistMult, BaseModel):
             'filtered_dict': filtered_dict,
             'rawid2id': rawid2id,
             'pred2id': pred2id,
+            'num_nodes': len(rawid2id),
+            'num_relations': len(pred2id),
         }
 
 
@@ -37,83 +40,93 @@ class CustomDistMult(DistMult, BaseModel):
 
 
 
-    def test(self, data: dict, **kwargs):
-        """
-        data: словарь из preprocess (head_index, rel_type, tail_index)
-        kwargs: параметры из конфига (batch_size, k_list, sampling и т.д.)
-        """
-
-        head_index = data['test_triplets'][:, 0]
-        rel_type = data['test_triplets'][:, 1]
-        tail_index = data['test_triplets'][:, 2]
+    def test(self, data: dict, val = False, **kwargs):
         filtered_dict = data['filtered_dict']
 
-        batch_size = kwargs.get('batch_size', 1024)
+        batch_size = kwargs.get('batch_size', 128)
         k_list = kwargs.get('k_list', [1, 5, 10, 50])
-        N = kwargs.get('N', None)
-        sampling = kwargs.get('sampling', False)
-        num_negs = kwargs.get('num_negs', 1000)
-        log = kwargs.get('log', True)
+        N_val = kwargs.get('N_val', None)
+        N_test = kwargs.get('N_test', None)
 
         self.eval()
 
-        if N is not None:
-            head_index = head_index[:N]
-            rel_type = rel_type[:N]
-            tail_index = tail_index[:N]
+        if val:
+            head_index = data['val_triplets'][:, 0]
+            rel_type = data['val_triplets'][:, 1]
+            tail_index = data['val_triplets'][:, 2]
+            num_queries = head_index.numel()
+            if N_val is not None:
+                num_queries = N_val
+        else:
+            head_index = data['test_triplets'][:, 0]
+            rel_type = data['test_triplets'][:, 1]
+            tail_index = data['test_triplets'][:, 2]
+            num_queries = head_index.numel()
+            if N_test is not None:
+                num_queries = N_test
 
-        arange = range(head_index.numel())
-        arange = tqdm(arange) if log else arange
 
-        mean_ranks, reciprocal_ranks, hits_at_k = [], [], {}
+
+        ranks = torch.zeros(num_queries, device=head_index.device)
+
+        #получаем эмбеддинги ВСЕХ узлов графа один раз
+        #E_all размерности [num_nodes, embedding_dim]
+        with torch.no_grad():
+            E_all = self.node_emb.weight.data
+
+            #разбиваем сами запросы (h, r) на батчи, а не хвосты
+            for start_idx in tqdm(range(0, num_queries, batch_size)):
+                end_idx = min(start_idx + batch_size, num_queries)
+
+                h_batch = head_index[start_idx:end_idx]
+                r_batch = rel_type[start_idx:end_idx]
+                t_batch = tail_index[start_idx:end_idx] #целевые хвосты
+
+                #получаем эмбеддинги для текущего батча запросов
+                h_emb = self.node_emb.weight.data[h_batch]
+                r_emb = self.rel_emb.weight.data[r_batch]
+
+                #query_emb: [current_batch_size, embedding_dim]
+                query_emb = h_emb * r_emb
+
+                #умножаем батч запросов на транспонированную матрицу всех узлов
+                #scores: [current_batch_size, num_nodes]
+                scores = torch.matmul(query_emb, E_all.T)
+
+                #фильтрация и маскирование для батча
+                if filtered_dict is not None:
+                    mask_batch = []
+                    mask_idx = []
+                    for i_in_batch, (h, r, t) in enumerate(zip(h_batch, r_batch, t_batch)):
+                        h, r, t = int(h), int(r), int(t)
+                        true_tails = filtered_dict.get((h, r), [])
+
+                        for true_t in true_tails:
+                            if true_t != t:
+                                mask_batch.append(i_in_batch)
+                                mask_idx.append(true_t)
+
+                    if mask_batch:
+                        scores[mask_batch, mask_idx] = -float('inf')
+
+                #выделяем целевые скоры [current_batch_size, 1]
+                target_scores = scores[torch.arange(len(t_batch)), t_batch].unsqueeze(1)
+
+                #cчитаем ранги для всего батча
+                batch_ranks = (scores > target_scores).sum(dim=1) + 1
+                ranks[start_idx:end_idx] = batch_ranks
+
+        #итоговый подсчет метрик
+        mrr = (1.0 / ranks).float().mean().item()
+
+        hits_at_k = {}
         for k in k_list:
-            hits_at_k[k] = []
+            hits_at_k[k] = (ranks <= k).float().mean().item()
 
-        for i in arange:
-            h, r, t = head_index[i], rel_type[i], tail_index[i]
-            scores = []
+        formatted_hits = {k: f"{v:.4f}" for k, v in hits_at_k.items()}
 
-            if sampling:
-                neg_tails = torch.randint(0, self.num_nodes, (num_negs,), device=t.device)
-                tail_indices = torch.cat([t.unsqueeze(0), neg_tails])
-                target_index = 0
-            else:
-                tail_indices = torch.arange(self.num_nodes, device=t.device)
-                target_index = t
+        return {'MRR': mrr, 'Hits': formatted_hits}
 
-            for ts in tail_indices.split(batch_size):
-                scores.append(self(h.expand_as(ts), r.expand_as(ts), ts))
-
-            scores = torch.cat(scores)
-
-            if filtered_dict is not None and not sampling:
-                #Получаем все известные истинные хвосты для пары (h, r)
-                true_tails = filtered_dict.get((int(h), int(r)), [])
-
-                # Маскируем все известные истинные хвосты, кроме текущего целевого t
-                for true_t in true_tails:
-                    if true_t != int(t):
-                        scores[true_t] = -float('inf') # Убираем из рейтинга
-
-
-            elif filtered_dict is not None and sampling:
-                raise ValueError
-
-            rank = int((scores.argsort(descending=True) == target_index).nonzero().view(-1))
-
-            mean_ranks.append(rank)
-            reciprocal_ranks.append(1 / (rank + 1))
-            for k in k_list:
-                hits_at_k[k].append(rank < k)
-
-        mean_rank = float(torch.tensor(mean_ranks, dtype=torch.float).mean())
-        mrr = float(torch.tensor(reciprocal_ranks, dtype=torch.float).mean())
-        for k in k_list:
-            hits_at_k[k] = float(torch.tensor(hits_at_k[k], dtype=torch.float).mean())
-
-        formatted_hits = {k: f"{v:.{4}f}" for k, v in hits_at_k.items()}
-        result_dict = {'MRR': mrr, 'Hits@': formatted_hits}
-        return result_dict
 
 
 
@@ -201,12 +214,8 @@ class CustomDistMult(DistMult, BaseModel):
 
 
     def train_model(self, data: dict, **kwargs):
-        """
-        data: словарь из preprocess (head_index, rel_type, tail_index)
-        kwargs: параметры из конфига (batch_size, k_list, sampling и т.д.)
-        """
+
         batch_size = kwargs.get('batch_size', 1024)
-        epochs = kwargs.get('epochs', 10)
         lr = kwargs.get('lr', 0.001)
 
         optimizer = Adam(self.parameters(), lr=lr)
@@ -217,22 +226,22 @@ class CustomDistMult(DistMult, BaseModel):
             shuffle=True
         )
 
-        for epoch in range(epochs):
-            self.train()
-            total_loss = 0
+        self.train()
+        total_loss = 0
 
-            for batch in train_loader:
-                h, r, t = batch[:, 0], batch[:, 1], batch[:, 2]
+        for batch in train_loader:
+            h, r, t = batch[:, 0], batch[:, 1], batch[:, 2]
 
-                optimizer.zero_grad()
-                loss = self.loss(h, r, t, negative_sampler=kwargs.get('sampler', 'sns'))
-                loss.backward()
-                optimizer.step()
+            optimizer.zero_grad()
+            loss = self.loss(h, r, t, negative_sampler=kwargs.get('sampler', 'sns'))
+            loss.backward()
+            optimizer.step()
 
-                total_loss += loss.item()
+            total_loss += loss.item()
 
-            avg_loss = total_loss / len(train_loader)
-            print(f"Epoch {epoch + 1} finished. Avg Loss: {avg_loss:.4f}")
+        avg_loss = total_loss / len(train_loader)
+
+        return avg_loss
 
 
 

@@ -1,57 +1,48 @@
 import pandas as pd
 import torch
-import wandb
+import mlflow
 
 import yaml
+from tqdm import tqdm
 
-from src import get_model
-from .utils import num_nodes_and_relations
-
+from src import get_model, preprocess
 
 
 def run_experiment(config_path):
     # 1. Загрузка настроек
-    with open(config_path, 'r') as f:
-        config = yaml.safe_load(f)
+    with mlflow.start_run():
+        with open(config_path, 'r') as f:
+            config = yaml.safe_load(f)
 
-    torch.manual_seed(config['random_seed'])
-    torch.cuda.manual_seed(config['random_seed'])
+        mlflow.log_params(config)
 
-    run = wandb.init(
-        entity="askakolbaska-itmo-university",
-        project="bioKG",
-        config=config,
-    )
+        torch.manual_seed(config['random_seed'])
+        torch.cuda.manual_seed(config['random_seed'])
 
-    df = pd.read_csv(config['data_params']['input_path'])
+        preprocessed_data = preprocess(config['model_type'], **config['data_params'])
+        preprocessed_data |= config['model_params']
 
-    num_nodes, num_relations = num_nodes_and_relations(
-        df,
-        config['data_params']['heads_col'],
-        config['data_params']['predicates_col'],
-        config['data_params']['tails_col']
-    )
+        model = get_model(
+            config['model_type'],
+            **preprocessed_data
+        )
 
-    model = get_model(
-        config['model_type'],
-        num_nodes=num_nodes,
-        num_relations=num_relations,
-        **config['model_params']
-    )
+        model = model.to(config['data_params']['device'])
 
-    processed_data  = model.preprocess(df, **config['data_params'])
+        print("[*] Starting training")
+        for epoch in tqdm(range(config['train_params']['epochs'])):
+            loss = model.train_model(preprocessed_data, **config['train_params'])
+            mrr = model.test(preprocessed_data, val=True, **config['test_params'])['MRR']
+            mlflow.log_metric("train_loss", loss, step=epoch)
+            mlflow.log_metric("val_MRR", mrr, step=epoch)
+            print(f'Loss: {loss:.4f}')
+            print(f'MRR: {mrr:.4f}')
 
-    model = model.to(config['data_params']['device'])
+        print("[*] Running evaluation...")
+        metrics = model.test(preprocessed_data, val=False, **config['test_params'])
+        mlflow.log_params(metrics)
+        print(f"Final Metrics: {metrics}")
 
-    print("[*] Starting training")
-    model.train_model(processed_data, **config['train_params'])
-
-    print("[*] Running evaluation...")
-    metrics = model.test(processed_data, **config['test_params'])
-    run.log(metrics)
-    print(f"Final Metrics: {metrics}")
-
-    run.finish()
 
 if __name__ == "__main__":
-    run_experiment("configs/distmult_config.yaml")
+        run_experiment("configs/distmult_config.yaml")
