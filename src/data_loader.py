@@ -8,7 +8,7 @@ from pykeen.triples import TriplesFactory
 __all__ = ['df_to_triplets_geometric','df_to_triplets_pykeen']
 
 def df_to_triplets_geometric(
-        df: pd.DataFrame,
+        path: str,
         heads: str,
         predicates: str,
         tails: str,
@@ -16,6 +16,8 @@ def df_to_triplets_geometric(
         test_and_val_size: float = 0.1,
         device: str = 'cpu',
 ):
+
+    df = pd.read_csv(path)
 
     node_keys, node_values = pd.factorize(pd.concat([df[heads], df[tails]]))
     rawid2id = {name: i for i, name in enumerate(node_values)}
@@ -53,21 +55,4 @@ def df_to_triplets_geometric(
 
     return train_triplets, val_triplets, test_triplets, filtered_dict, rawid2id, pred2id
 
-
-def df_to_triplets_pykeen(
-        df: pd.DataFrame,
-        heads: str,
-        predicates: str,
-        tails: str,
-        train_size: float = 0.8,
-        test_and_val_size: float = 0.1,
-        create_inverse: bool = False,
-        random_state: int = 42
-):
-    main_data = df.astype(str)
-    triples = main_data[[heads, predicates, tails]].values
-    triplet_data = TriplesFactory.from_labeled_triples(triples, create_inverse_triples=create_inverse)
-    training_set, testing_set, validation_set = triplet_data.split([train_size, test_and_val_size, test_and_val_size], random_state=random_state)
-
-    return training_set, testing_set, validation_set
 

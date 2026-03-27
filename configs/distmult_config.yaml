@@ -16,15 +16,13 @@ model_params:
   margin: 1.0
 
 train_params:
-  batch_size: 8192
+  batch_size: 4096
   epochs: 5
   lr: 0.001
   sampler: 'sns'
 
 
 test_params:
-  batch_size: 8192
+  batch_size: 128
   k_list: [1, 5, 10, 50]
-  N: 5000
-  sampling: False
-  log: True
+  N_val: 10000
