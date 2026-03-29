@@ -1,4 +1,3 @@
-import pandas as pd
 import torch
 import mlflow
 
@@ -45,4 +44,4 @@ def run_experiment(config_path):
 
 
 if __name__ == "__main__":
-        run_experiment("configs/distmult_config.yaml")
+        run_experiment("configs/multi_distmult_config.yaml")

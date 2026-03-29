@@ -26,7 +26,7 @@ def merge_dicts_from_folder(
         if filename.endswith('.pkl'):
             file_path = os.path.join(path, filename)
 
-            with open(file_path, 'rb', encoding='utf-8') as f:
+            with open(file_path, 'rb') as f:
                 data = pickle.load(f)
                 combined_dict |= data
 

@@ -3,7 +3,8 @@ random_seed: 42
 model_type: "distmult"
 
 data_params:
-  input_path: 'data/edges/clean_triples.csv'
+
+  input_path: 'data/edges/clean_edges_without_NaNm.csv'
   heads_col: 'id_entity_1'
   predicates_col: 'predicate'
   tails_col: 'id_entity_2'
@@ -23,6 +24,5 @@ train_params:
 
 
 test_params:
-  batch_size: 128
   k_list: [1, 5, 10, 50]
   N_val: 10000

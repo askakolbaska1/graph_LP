@@ -3,7 +3,7 @@ from collections import defaultdict
 import torch
 import pandas as pd
 import numpy as np
-from pykeen.triples import TriplesFactory
+from torch.utils.data import Dataset
 
 __all__ = ['df_to_triplets_geometric','df_to_triplets_pykeen']
 
@@ -55,4 +55,22 @@ def df_to_triplets_geometric(
 
     return train_triplets, val_triplets, test_triplets, filtered_dict, rawid2id, pred2id
 
+class MDMDataset(Dataset):
+    def __init__(self, h_local, h_type, rel, t_local, t_type):
+        self.h_local = h_local
+        self.h_type = h_type
+        self.rel = rel
+        self.t_local = t_local
+        self.t_type = t_type
 
+    def __len__(self):
+        return len(self.h_local)
+
+    def __getitem__(self, idx):
+        return (
+            self.h_local[idx],
+            self.h_type[idx],
+            self.rel[idx],
+            self.t_local[idx],
+            self.t_type[idx]
+        )
