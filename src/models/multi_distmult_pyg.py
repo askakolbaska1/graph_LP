@@ -363,11 +363,11 @@ class MultiModalDistMult(nn.Module, BaseModel):
 
                 del all_scores, query_emb
 
-                mrr = mrr / total_samples
-                hits = {k: v / total_samples for k, v in hits.items()}
-                formatted_hits = {k: f"{v:.4f}" for k, v in hits.items()}
+            mrr = mrr / total_samples
+            hits = {k: v / total_samples for k, v in hits.items()}
+            formatted_hits = {k: f"{v:.4f}" for k, v in hits.items()}
 
-                return {'MRR': mrr, 'Hits': formatted_hits}
+            return {'MRR': mrr, 'Hits': formatted_hits}
 
 
 
