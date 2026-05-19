@@ -1,4 +1,5 @@
-get_embeddings/esm_650m_emb.py - пример получения эмбеддингов esm
-KGE/MLP_different_emb.ipynb - pykeen pipeline для разных типов эмбеддингов
-PyG/Lineral+SAGE.ipynb - GraphSAGE для разных типов эмбеддингов
-utils - функции для работы
+gnn_ipynb - папка с итоговыми ноутбуками, 2 модели: MultiMult - KGE на основе предобученных эмбеддингов c MLP проекторами
+MultiMult2Sage - GraphSAGE на основе эмбеддингов из MultiMult
+
+Предобученные эмбеддинги брались из моделей: ESM_650M для белков, ChemBerta_77M для малых молекул, rna_berta для РНК, dna_berta для ДНК и Смешанных молекул соотвественно.
+В моделях типы молекул NucleicAmbigous и NucleicMixed были объединены с DNA
